@@ -10,7 +10,7 @@ class Transaction {
 
   // Obtener transacciones con detalles de cuenta y categoría
   public function getTransactions(){
-    $this->db->query('SELECT t.id, t.amount, t.type, t.description, t.transaction_date,
+    $this->db->query('SELECT t.id, t.account_id, t.category_id, t.amount, t.type, t.description, t.transaction_date,
                              a.name as account_name, c.name as category_name
                       FROM transactions t
                       INNER JOIN accounts a ON t.account_id = a.id
