@@ -128,7 +128,8 @@ class _LoanFormScreenState extends ConsumerState<LoanFormScreen> {
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<int>(
-                initialValue: _accountId,
+                initialValue:
+                    accounts.any((a) => a.id == _accountId) ? _accountId : null,
                 decoration: const InputDecoration(
                     labelText: 'Cuenta de origen',
                     prefixIcon: Icon(Icons.account_balance_wallet_outlined)),

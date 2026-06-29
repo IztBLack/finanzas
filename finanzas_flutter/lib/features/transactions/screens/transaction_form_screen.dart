@@ -160,7 +160,8 @@ class _TransactionFormScreenState
 
               // Cuenta
               DropdownButtonFormField<int>(
-                initialValue: _accountId,
+                initialValue:
+                    accounts.any((a) => a.id == _accountId) ? _accountId : null,
                 decoration: const InputDecoration(
                     labelText: 'Cuenta',
                     prefixIcon: Icon(Icons.account_balance_wallet_outlined)),

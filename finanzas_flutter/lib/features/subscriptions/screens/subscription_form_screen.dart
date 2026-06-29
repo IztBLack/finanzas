@@ -118,7 +118,8 @@ class _SubscriptionFormScreenState extends ConsumerState<SubscriptionFormScreen>
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<int>(
-                initialValue: _accountId,
+                initialValue:
+                    accounts.any((a) => a.id == _accountId) ? _accountId : null,
                 decoration: const InputDecoration(
                     labelText: 'Cuenta de cobro',
                     prefixIcon: Icon(Icons.account_balance_wallet_outlined)),

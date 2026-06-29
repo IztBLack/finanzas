@@ -42,3 +42,6 @@ finanzas_flutter/macos/Pods/
 finanzas_flutter/linux/flutter/ephemeral/
 finanzas_flutter/windows/flutter/ephemeral/
 finanzas_flutter/web/
+
+# APKs generados (no versionar)
+*.apk

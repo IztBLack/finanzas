@@ -32,8 +32,9 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
   void _loadAccount() {
     final accounts = ref.read(accountsProvider).valueOrNull ?? [];
-    _editing = accounts.firstWhere((a) => a.id == widget.accountId,
-        orElse: () => accounts.first);
+    _editing = accounts.cast<Account?>().firstWhere(
+        (a) => a?.id == widget.accountId,
+        orElse: () => null);
     if (_editing != null) {
       _nameCtrl.text    = _editing!.name;
       _balanceCtrl.text = _editing!.initialBalance.toString();
