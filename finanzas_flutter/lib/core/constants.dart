@@ -5,7 +5,7 @@ class AppConstants {
   /// URL base del backend PHP.
   /// En producción apuntará al dominio real; en dev a la IP LAN.
   static const String baseUrl =
-      'http://192.168.1.97/Finanzas/public/api.php';
+      'http://192.168.1.97/Finanzas/public/api';
 
   // Claves de almacenamiento seguro
   static const String tokenKey = 'finanzas_token';
