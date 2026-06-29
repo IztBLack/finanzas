@@ -23,3 +23,21 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# ── Flutter (finanzas_flutter/) ───────────────────────────────────────────
+finanzas_flutter/.dart_tool/
+finanzas_flutter/.flutter-plugins
+finanzas_flutter/.flutter-plugins-dependencies
+finanzas_flutter/build/
+finanzas_flutter/.packages
+finanzas_flutter/pubspec.lock
+finanzas_flutter/android/.gradle/
+finanzas_flutter/android/local.properties
+finanzas_flutter/android/key.properties
+finanzas_flutter/*.jks
+finanzas_flutter/ios/Pods/
+finanzas_flutter/ios/.symlinks/
+finanzas_flutter/macos/Pods/
+finanzas_flutter/linux/flutter/ephemeral/
+finanzas_flutter/windows/flutter/ephemeral/
+finanzas_flutter/web/

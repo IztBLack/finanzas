@@ -1,0 +1,37 @@
+name: finanzas_flutter
+description: Control de Finanzas personales — app móvil sincronizada con backend PHP.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # HTTP client
+  dio: ^5.7.0
+
+  # Estado global
+  flutter_riverpod: ^2.6.1
+
+  # Navegación declarativa
+  go_router: ^14.6.3
+
+  # Token seguro en dispositivo
+  flutter_secure_storage: ^9.2.2
+
+  # Tipografía
+  google_fonts: ^6.2.1
+
+  # Formato de fechas y moneda
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
