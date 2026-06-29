@@ -1,0 +1,25 @@
+# Credenciales y configuración local
+app/config/config.php
+
+# Scripts de mantenimiento de BD (no deben estar en producción)
+fix_db.php
+fix_users.php
+force_alter.php
+db_log.txt
+
+# Documentación interna de planeación (no publicar)
+docs/
+
+# Dependencias y builds
+/vendor/
+node_modules/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

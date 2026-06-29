@@ -1,0 +1,124 @@
+name: iOS Build (IPA sin firmar)
+
+# Compila la app Flutter iOS en un runner macOS de GitHub y publica un IPA SIN FIRMAR.
+# 1) Como artifact (descarga manual de respaldo).
+# 2) En un Release rodante con tag fijo "sidestore" + manifiesto apps.json,
+#    para que SideStore lo instale/actualice con un toque desde el iPhone.
+#
+# El build-number (CFBundleVersion) se fija al número de run de Actions,
+# asegurando que SideStore detecte siempre el update.
+
+on:
+  workflow_dispatch:   # lanzar manualmente desde la pestaña Actions
+  push:
+    branches: [main]
+    paths:
+      - 'finanzas_flutter/**'   # solo cuando haya cambios en la app Flutter
+
+permissions:
+  contents: write
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.2
+          cache: true
+
+      - name: Dependencias
+        working-directory: finanzas_flutter
+        run: flutter pub get
+
+      - name: Build iOS (sin firma)
+        working-directory: finanzas_flutter
+        run: flutter build ios --release --no-codesign --build-number=${{ github.run_number }}
+
+      - name: Empaquetar IPA sin firmar
+        run: |
+          cd finanzas_flutter/build/ios/iphoneos
+          rm -rf Payload Finanzas.ipa
+          mkdir Payload
+          mv Runner.app Payload/Runner.app
+          find Payload -name '.DS_Store' -delete
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload Finanzas.ipa
+          echo "=== Estructura del IPA ==="
+          unzip -l Finanzas.ipa | head -25
+
+      - name: Publicar IPA como artifact (respaldo)
+        uses: actions/upload-artifact@v4
+        with:
+          name: finanzas-unsigned-ipa
+          path: finanzas_flutter/build/ios/iphoneos/Finanzas.ipa
+          if-no-files-found: error
+
+      - name: Calcular metadatos
+        id: meta
+        run: |
+          IPA=finanzas_flutter/build/ios/iphoneos/Finanzas.ipa
+          SIZE=$(stat -f%z "$IPA")
+          SHORTVER=$(grep '^version:' finanzas_flutter/pubspec.yaml | sed -E 's/version:[[:space:]]*//' | cut -d'+' -f1)
+          echo "size=$SIZE"                              >> "$GITHUB_OUTPUT"
+          echo "shortver=$SHORTVER"                     >> "$GITHUB_OUTPUT"
+          echo "buildver=${{ github.run_number }}"      >> "$GITHUB_OUTPUT"
+          echo "date=$(date +%F)"                       >> "$GITHUB_OUTPUT"
+
+      - name: Generar apps.json (manifiesto SideStore)
+        run: |
+          DL="https://github.com/${{ github.repository }}/releases/download/sidestore/Finanzas.ipa"
+          ICON="https://raw.githubusercontent.com/${{ github.repository }}/main/finanzas_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-1024.png"
+          cat > apps.json <<EOF
+          {
+            "name": "Finanzas (IztBLack)",
+            "identifier": "com.iztblack.finanzas.source",
+            "sourceURL": "https://github.com/${{ github.repository }}/releases/download/sidestore/apps.json",
+            "apps": [
+              {
+                "name": "Control de Finanzas",
+                "bundleIdentifier": "com.iztblack.finanzas",
+                "developerName": "IztBLack",
+                "subtitle": "Finanzas personales",
+                "localizedDescription": "App de control de finanzas personales (build ${{ steps.meta.outputs.buildver }}).",
+                "iconURL": "$ICON",
+                "tintColor": "1565C0",
+                "category": "finance",
+                "downloadURL": "$DL",
+                "size": ${{ steps.meta.outputs.size }},
+                "version": "${{ steps.meta.outputs.shortver }}",
+                "versionDate": "${{ steps.meta.outputs.date }}",
+                "versions": [
+                  {
+                    "version": "${{ steps.meta.outputs.shortver }}",
+                    "buildVersion": "${{ steps.meta.outputs.buildver }}",
+                    "date": "${{ steps.meta.outputs.date }}",
+                    "localizedDescription": "Build ${{ steps.meta.outputs.buildver }} — ${{ steps.meta.outputs.date }}",
+                    "downloadURL": "$DL",
+                    "size": ${{ steps.meta.outputs.size }},
+                    "minOSVersion": "14.0"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+          echo "=== apps.json generado ==="
+          cat apps.json
+
+      - name: Publicar Release rodante (IPA + apps.json)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          IPA=finanzas_flutter/build/ios/iphoneos/Finanzas.ipa
+          if gh release view sidestore >/dev/null 2>&1; then
+            gh release upload sidestore "$IPA" apps.json --clobber
+          else
+            gh release create sidestore "$IPA" apps.json \
+              --title "SideStore Source (rolling)" \
+              --notes "Release rodante: se sobreescribe en cada build de main. Fuente para SideStore."
+          fi

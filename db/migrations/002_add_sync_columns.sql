@@ -1,0 +1,32 @@
+-- Migración 002: Columnas de sincronización (updated_at, deleted_at)
+-- Necesarias para sync incremental (/api/sync?since=) y soft delete
+
+-- accounts
+ALTER TABLE accounts
+    ADD COLUMN IF NOT EXISTS updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at,
+    ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL AFTER updated_at;
+
+-- categories
+ALTER TABLE categories
+    ADD COLUMN IF NOT EXISTS updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at,
+    ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL AFTER updated_at;
+
+-- transactions
+ALTER TABLE transactions
+    ADD COLUMN IF NOT EXISTS updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at,
+    ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL AFTER updated_at;
+
+-- loans
+ALTER TABLE loans
+    ADD COLUMN IF NOT EXISTS updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at,
+    ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL AFTER updated_at;
+
+-- loan_payments
+ALTER TABLE loan_payments
+    ADD COLUMN IF NOT EXISTS updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at,
+    ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL AFTER updated_at;
+
+-- subscriptions
+ALTER TABLE subscriptions
+    ADD COLUMN IF NOT EXISTS updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at,
+    ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL AFTER updated_at;
