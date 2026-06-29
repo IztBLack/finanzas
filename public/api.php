@@ -12,6 +12,17 @@
 // Bootstrap
 require_once '../app/bootstrap.php';
 
+// Habilitar CORS para permitir peticiones desde Flutter Web u otros orígenes
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+
+// Si es una petición preflight (OPTIONS), salir inmediatamente con 200 OK
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 // Limpiar y segmentar la URL
 $url = isset($_GET['url']) ? rtrim($_GET['url'], '/') : '';
 $url = filter_var($url, FILTER_SANITIZE_URL);
