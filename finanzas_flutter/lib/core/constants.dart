@@ -25,4 +25,11 @@ class AppColors {
   static const Color textPrimary   = Color(0xFFE8EAF0);
   static const Color textSecondary = Color(0xFF8A93A8);
   static const Color divider    = Color(0xFF262D42);
+
+  /// Color neutral para estados pausados/inactivos (suscripciones, etc.)
+  static const Color neutral    = Color(0xFF8A93A8);
+  /// Color de advertencia (saldos pendientes, alertas suaves).
+  static const Color warning    = Color(0xFFFFB74D);
+  /// Color base para shimmer de skeletons.
+  static const Color skeleton   = Color(0xFF232940);
 }

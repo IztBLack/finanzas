@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import '../../core/constants.dart';
 
+/// Estado vacío consistente para listas (cuentas, movimientos, préstamos,
+/// suscripciones, categorías). Icono dentro de un halo "glass" + mensaje
+/// + acción opcional para crear el primer elemento.
 class EmptyState extends StatelessWidget {
   final String message;
   final IconData icon;
   final VoidCallback? onAction;
   final String? actionLabel;
+  final String? subtitle;
 
   const EmptyState({
     super.key,
@@ -12,6 +17,7 @@ class EmptyState extends StatelessWidget {
     this.icon = Icons.inbox_outlined,
     this.onAction,
     this.actionLabel,
+    this.subtitle,
   });
 
   @override
@@ -22,19 +28,45 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 64, color: Colors.grey[700]),
-            const SizedBox(height: 16),
+            Container(
+              width: 84,
+              height: 84,
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                shape: BoxShape.circle,
+                border: const Border.fromBorderSide(
+                    BorderSide(color: AppColors.cardBorder)),
+              ),
+              child: Icon(icon, size: 36, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 20),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[500], fontSize: 15),
+              style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600),
             ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                subtitle!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 13),
+              ),
+            ],
             if (onAction != null) ...[
-              const SizedBox(height: 20),
-              TextButton.icon(
+              const SizedBox(height: 22),
+              ElevatedButton.icon(
                 onPressed: onAction,
                 icon: const Icon(Icons.add),
                 label: Text(actionLabel ?? 'Agregar'),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(0, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                ),
               ),
             ],
           ],
@@ -44,6 +76,7 @@ class EmptyState extends StatelessWidget {
   }
 }
 
+/// Estado de error consistente para listas y pantallas completas.
 class ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
@@ -58,12 +91,32 @@ class ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.wifi_off_rounded, size: 56, color: Color(0xFFEF5350)),
-            const SizedBox(height: 16),
+            Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: AppColors.expense.withOpacity(0.12),
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.expense.withOpacity(0.3)),
+              ),
+              child: const Icon(Icons.wifi_off_rounded,
+                  size: 32, color: AppColors.expense),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'No se pudo cargar la información',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFFEF5350), fontSize: 14),
+              style: const TextStyle(
+                  color: AppColors.textSecondary, fontSize: 13),
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 20),
@@ -71,6 +124,12 @@ class ErrorState extends StatelessWidget {
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
                 label: const Text('Reintentar'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.textPrimary,
+                  side: const BorderSide(color: AppColors.cardBorder),
+                  minimumSize: const Size(0, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                ),
               ),
             ],
           ],

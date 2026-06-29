@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../../../core/constants.dart';
 import '../../../features/accounts/providers/accounts_provider.dart';
 import '../../../features/categories/providers/categories_provider.dart';
+import '../../../shared/widgets/form_widgets.dart';
 import '../providers/transactions_provider.dart';
 import '../models/transaction.dart';
 
@@ -24,6 +27,8 @@ class _TransactionFormScreenState
   int?    _categoryId;
   String  _date     = DateTime.now().toIso8601String().split('T').first;
   bool    _loading  = false;
+
+  bool get _isEditing => widget.transactionId != null;
 
   @override
   void initState() {
@@ -61,13 +66,11 @@ class _TransactionFormScreenState
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_accountId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Selecciona una cuenta')));
+      showAppSnackBar(context, 'Selecciona una cuenta', isError: true);
       return;
     }
     if (_categoryId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Selecciona una categoría')));
+      showAppSnackBar(context, 'Selecciona una categoría', isError: true);
       return;
     }
     setState(() => _loading = true);
@@ -89,8 +92,7 @@ class _TransactionFormScreenState
       }
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted) showAppSnackBar(context, e.toString(), isError: true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -107,40 +109,44 @@ class _TransactionFormScreenState
     final accounts   = ref.watch(accountsProvider).valueOrNull ?? [];
     final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
     final filtCats   = categories.where((c) => c.type == _type).toList();
+    final dateLabel  = DateFormat('d MMM yyyy', 'es_MX')
+        .format(DateTime.tryParse(_date) ?? DateTime.now());
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.transactionId != null
-            ? 'Editar movimiento'
-            : 'Nuevo movimiento'),
+        title: Text(_isEditing ? 'Editar movimiento' : 'Nuevo movimiento'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Tipo
-              const Text('Tipo', style: TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
+              const FormSectionLabel('Tipo de movimiento'),
               Row(children: [
-                Expanded(child: _TypeBtn(
-                    label: 'Gasto', selected: _type == 'expense',
-                    color: const Color(0xFFEF5350),
+                Expanded(child: FormToggleButton(
+                    label: 'Gasto',
+                    icon: Icons.arrow_upward,
+                    selected: _type == 'expense',
+                    color: AppColors.expense,
                     onTap: () => setState(() { _type = 'expense'; _categoryId = null; }))),
                 const SizedBox(width: 10),
-                Expanded(child: _TypeBtn(
-                    label: 'Ingreso', selected: _type == 'income',
-                    color: const Color(0xFF00BFA5),
+                Expanded(child: FormToggleButton(
+                    label: 'Ingreso',
+                    icon: Icons.arrow_downward,
+                    selected: _type == 'income',
+                    color: AppColors.income,
                     onTap: () => setState(() { _type = 'income'; _categoryId = null; }))),
               ]),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Monto
               TextFormField(
                 controller: _amountCtrl,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
                 decoration: const InputDecoration(
                     labelText: 'Monto', prefixText: '\$ '),
                 validator: (v) {
@@ -150,33 +156,59 @@ class _TransactionFormScreenState
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Cuenta
               DropdownButtonFormField<int>(
-                value: _accountId,
-                decoration: const InputDecoration(labelText: 'Cuenta'),
+                initialValue: _accountId,
+                decoration: const InputDecoration(
+                    labelText: 'Cuenta',
+                    prefixIcon: Icon(Icons.account_balance_wallet_outlined)),
                 items: accounts.map((a) => DropdownMenuItem(
                     value: a.id,
                     child: Text(a.name, overflow: TextOverflow.ellipsis))).toList(),
                 onChanged: (v) => setState(() => _accountId = v),
                 validator: (v) => v == null ? 'Selecciona una cuenta' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Categoría
-              DropdownButtonFormField<int>(
-                value: filtCats.any((c) => c.id == _categoryId)
-                    ? _categoryId
-                    : null,
-                decoration: const InputDecoration(labelText: 'Categoría'),
-                items: filtCats.map((c) => DropdownMenuItem(
-                    value: c.id,
-                    child: Text(c.name, overflow: TextOverflow.ellipsis))).toList(),
-                onChanged: (v) => setState(() => _categoryId = v),
-                validator: (v) => v == null ? 'Selecciona una categoría' : null,
-              ),
-              const SizedBox(height: 16),
+              if (filtCats.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.warning.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.info_outline, color: AppColors.warning, size: 18),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'No tienes categorías de este tipo. Crea una desde el menú de Categorías.',
+                          style: TextStyle(color: AppColors.warning, fontSize: 12.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                DropdownButtonFormField<int>(
+                  initialValue: filtCats.any((c) => c.id == _categoryId)
+                      ? _categoryId
+                      : null,
+                  decoration: const InputDecoration(
+                      labelText: 'Categoría',
+                      prefixIcon: Icon(Icons.label_outline)),
+                  items: filtCats.map((c) => DropdownMenuItem(
+                      value: c.id,
+                      child: Text(c.name, overflow: TextOverflow.ellipsis))).toList(),
+                  onChanged: (v) => setState(() => _categoryId = v),
+                  validator: (v) => v == null ? 'Selecciona una categoría' : null,
+                ),
+              const SizedBox(height: 20),
 
               // Fecha
               GestureDetector(
@@ -184,67 +216,33 @@ class _TransactionFormScreenState
                 child: InputDecorator(
                   decoration: const InputDecoration(
                       labelText: 'Fecha',
-                      suffixIcon: Icon(Icons.calendar_today_outlined)),
-                  child: Text(_date),
+                      prefixIcon: Icon(Icons.calendar_today_outlined),
+                      suffixIcon: Icon(Icons.keyboard_arrow_down)),
+                  child: Text(dateLabel,
+                      style: const TextStyle(fontWeight: FontWeight.w500)),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Descripción
               TextFormField(
                 controller: _descCtrl,
-                decoration: const InputDecoration(labelText: 'Descripción (opcional)'),
+                textInputAction: TextInputAction.done,
+                decoration: const InputDecoration(
+                    labelText: 'Descripción (opcional)',
+                    prefixIcon: Icon(Icons.notes_outlined)),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 36),
 
-              ElevatedButton(
-                onPressed: _loading ? null : _submit,
-                child: _loading
-                    ? const SizedBox(width: 22, height: 22,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2.5, color: Colors.white))
-                    : Text(widget.transactionId != null
-                        ? 'Actualizar'
-                        : 'Registrar movimiento'),
+              SubmitButton(
+                loading: _loading,
+                onPressed: _submit,
+                icon: _isEditing ? Icons.save_outlined : Icons.add,
+                label: _isEditing ? 'Actualizar' : 'Registrar movimiento',
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _TypeBtn extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final Color color;
-  final VoidCallback onTap;
-  const _TypeBtn(
-      {required this.label,
-      required this.selected,
-      required this.color,
-      required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.18) : const Color(0xFF1C2132),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-              color: selected ? color : const Color(0xFF262D42),
-              width: selected ? 2 : 1),
-        ),
-        child: Text(label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: selected ? color : const Color(0xFF8A93A8))),
       ),
     );
   }

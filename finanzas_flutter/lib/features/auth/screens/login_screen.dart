@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/constants.dart';
 import '../../../core/storage_service.dart';
 import '../data/auth_repository.dart';
 import '../providers/auth_provider.dart';
@@ -54,7 +55,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0D14),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -69,11 +70,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1565C0),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF1565C0).withOpacity(0.35),
+                        color: AppColors.primary.withOpacity(0.35),
                         blurRadius: 28,
                         spreadRadius: 2,
                       ),
@@ -92,16 +93,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     letterSpacing: -0.5,
                   ),
                 ),
               ),
               const SizedBox(height: 8),
-              Center(
+              const Center(
                 child: Text(
                   'Inicia sesión en tu cuenta',
-                  style: TextStyle(fontSize: 15, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 44),
@@ -156,21 +157,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEF5350).withOpacity(0.1),
+                          color: AppColors.expense.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                              color: const Color(0xFFEF5350).withOpacity(0.4)),
+                              color: AppColors.expense.withOpacity(0.4)),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.error_outline,
-                                color: Color(0xFFEF5350), size: 18),
+                                color: AppColors.expense, size: 18),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 _error!,
                                 style: const TextStyle(
-                                    color: Color(0xFFEF5350), fontSize: 13),
+                                    color: AppColors.expense, fontSize: 13),
                               ),
                             ),
                           ],
@@ -202,10 +203,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: 40),
 
               // Footer
-              Center(
+              const Center(
                 child: Text(
                   'Finanzas © 2026',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
                 ),
               ),
               const SizedBox(height: 24),

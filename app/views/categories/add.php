@@ -1,24 +1,32 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
-  <a href="<?php echo URLROOT; ?>/categories" class="btn btn-light"><i class="fa fa-backward"></i> Regresar</a>
-  <div class="card card-body bg-light mt-4 shadow-sm">
-    <h2>Añadir Categoría</h2>
-    <p>Crea una categoría para clasificar tus ingresos y gastos (Ej: Comida, Transporte, Sueldo)</p>
+  <a href="<?php echo URLROOT; ?>/categories" class="btn btn-light mb-3"><i class="fa fa-backward"></i> Regresar</a>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h4 class="m-0 font-weight-bold text-primary"><i class="fas fa-plus-circle mr-2"></i> Añadir Categoría</h4>
+        <small class="text-muted">Clasifica tus ingresos y gastos (Ej: Comida, Transporte, Sueldo)</small>
+    </div>
+    <div class="card-body p-4">
     <form action="<?php echo URLROOT; ?>/categories/add" method="post">
-      <div class="form-group">
-        <label for="name">Nombre: <sup>*</sup></label>
-        <input type="text" name="name" class="form-control form-control-lg <?php echo (!empty($data['name_err'])) ? 'is-invalid' : ''; ?>" value="<?php echo $data['name']; ?>" placeholder="Ej: Supermercado">
-        <span class="invalid-feedback"><?php echo $data['name_err']; ?></span>
+      <div class="row">
+        <div class="col-md-6 form-group mb-4">
+          <label for="name" class="form-section-label">Nombre <sup>*</sup></label>
+          <input type="text" name="name" class="form-control <?php echo (!empty($data['name_err'])) ? 'is-invalid' : ''; ?>" value="<?php echo $data['name']; ?>" placeholder="Ej: Supermercado">
+          <span class="invalid-feedback"><?php echo $data['name_err']; ?></span>
+        </div>
+        <div class="col-md-6 form-group mb-4">
+          <label for="type" class="form-section-label">Tipo <sup>*</sup></label>
+          <select name="type" class="form-control <?php echo (!empty($data['type_err'])) ? 'is-invalid' : ''; ?>">
+              <option value="">Selecciona el tipo...</option>
+              <option value="expense" <?php echo ($data['type'] == 'expense') ? 'selected' : ''; ?>>Gasto</option>
+              <option value="income" <?php echo ($data['type'] == 'income') ? 'selected' : ''; ?>>Ingreso</option>
+          </select>
+          <span class="invalid-feedback"><?php echo $data['type_err']; ?></span>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="type">Tipo: <sup>*</sup></label>
-        <select name="type" class="form-control form-control-lg <?php echo (!empty($data['type_err'])) ? 'is-invalid' : ''; ?>">
-            <option value="">Selecciona el tipo...</option>
-            <option value="expense" <?php echo ($data['type'] == 'expense') ? 'selected' : ''; ?>>Gasto</option>
-            <option value="income" <?php echo ($data['type'] == 'income') ? 'selected' : ''; ?>>Ingreso</option>
-        </select>
-        <span class="invalid-feedback"><?php echo $data['type_err']; ?></span>
-      </div>
-      <input type="submit" class="btn btn-success" value="Guardar Categoría">
+      <hr>
+      <button type="submit" class="btn btn-success px-4 py-2 font-weight-bold"><i class="fas fa-save mr-2"></i> Guardar Categoría</button>
     </form>
+    </div>
   </div>
 <?php require APPROOT . '/views/inc/footer.php'; ?>

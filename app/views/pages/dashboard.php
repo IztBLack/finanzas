@@ -76,7 +76,14 @@
                           </tr>
                       <?php endforeach; ?>
                       <?php if(empty($data['recent_transactions'])): ?>
-                          <tr><td colspan="4" class="text-center text-muted py-4">Aún no has registrado ninguna transacción. <a href="<?php echo URLROOT; ?>/transactions/add">Comienza aquí</a>.</td></tr>
+                          <tr><td colspan="4" class="p-0">
+                              <div class="empty-state">
+                                  <i class="fas fa-receipt"></i>
+                                  <h5>Aún no has registrado ninguna transacción</h5>
+                                  <p class="mb-3">Comienza a llevar el control de tus ingresos y gastos.</p>
+                                  <a href="<?php echo URLROOT; ?>/transactions/add" class="btn btn-primary"><i class="fas fa-plus mr-1"></i> Registrar mi primera transacción</a>
+                              </div>
+                          </td></tr>
                       <?php endif; ?>
                   </tbody>
               </table>

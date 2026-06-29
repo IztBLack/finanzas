@@ -14,3 +14,7 @@
   define('URLROOT', 'http://localhost/Finanzas');
   // Site Name
   define('SITENAME', 'Control de Finanzas');
+
+  // Entorno: 'development' (CORS permisivo para Flutter web local)
+  // o 'production' (CORS restringido a la allowlist de ApiController)
+  define('APP_ENV', 'development');

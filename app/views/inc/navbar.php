@@ -71,7 +71,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4 sticky-top">
   <div class="container">
     <a class="navbar-brand navbar-brand-custom" href="<?php echo URLROOT; ?>">
-        <i class="fas fa-graduation-cap"></i> <?php echo SITENAME; ?>
+        <i class="fas fa-wallet"></i> <?php echo SITENAME; ?>
     </a>
     <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>

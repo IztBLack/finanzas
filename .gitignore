@@ -6,6 +6,7 @@ fix_db.php
 fix_users.php
 force_alter.php
 db_log.txt
+seed_demo.php
 
 # Documentación interna de planeación (no publicar)
 docs/

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/loading_state.dart';
 import '../providers/dashboard_provider.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -55,7 +56,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         ],
       ),
       body: dash.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingState(),
         error: (e, _) => ErrorState(
           message: e.toString(),
           onRetry: () => ref.invalidate(dashboardProvider),

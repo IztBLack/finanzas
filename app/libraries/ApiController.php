@@ -202,9 +202,15 @@ class ApiController {
   // ----------------------------------------------------------
 
   private function setCorsHeaders() {
-    $origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
-    header('Access-Control-Allow-Origin: ' . $origin);
-    header('Vary: Origin');
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    // En desarrollo reflejamos cualquier origen (Flutter web local).
+    // En producción solo orígenes de la allowlist. La app móvil nativa
+    // no envía Origin, así que no necesita ninguna cabecera CORS.
+    $isDev = !defined('APP_ENV') || APP_ENV === 'development';
+    if ($origin !== '' && ($isDev || in_array($origin, $this->allowedOrigins, true))) {
+      header('Access-Control-Allow-Origin: ' . $origin);
+      header('Vary: Origin');
+    }
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
   }

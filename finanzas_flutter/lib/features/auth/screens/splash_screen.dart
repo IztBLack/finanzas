@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/constants.dart';
 import '../../../core/storage_service.dart';
 import '../providers/auth_provider.dart';
 
@@ -53,7 +54,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0D14),
+      backgroundColor: AppColors.background,
       body: FadeTransition(
         opacity: _fade,
         child: Center(
@@ -64,11 +65,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 width: 90,
                 height: 90,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1565C0),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF1565C0).withOpacity(0.4),
+                      color: AppColors.primary.withOpacity(0.4),
                       blurRadius: 32,
                       spreadRadius: 4,
                     ),
@@ -83,14 +84,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 8),
               const Text(
                 'Control de finanzas personales',
-                style: TextStyle(fontSize: 14, color: Color(0xFF8A93A8)),
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
               const SizedBox(height: 48),
               const SizedBox(
@@ -98,7 +99,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 height: 28,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  color: Color(0xFF1565C0),
+                  color: AppColors.primary,
                 ),
               ),
             ],

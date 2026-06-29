@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants.dart';
 import '../../../features/accounts/providers/accounts_provider.dart';
+import '../../../shared/widgets/form_widgets.dart';
 import '../providers/subscriptions_provider.dart';
 import '../models/subscription.dart';
 
@@ -23,6 +25,8 @@ class _SubscriptionFormScreenState extends ConsumerState<SubscriptionFormScreen>
   String _status     = 'active';
   bool   _loading    = false;
 
+  bool get _isEditing => widget.subscriptionId != null;
+
   @override
   void initState() {
     super.initState();
@@ -44,8 +48,7 @@ class _SubscriptionFormScreenState extends ConsumerState<SubscriptionFormScreen>
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_accountId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Selecciona una cuenta')));
+      showAppSnackBar(context, 'Selecciona una cuenta', isError: true);
       return;
     }
     setState(() => _loading = true);
@@ -65,8 +68,7 @@ class _SubscriptionFormScreenState extends ConsumerState<SubscriptionFormScreen>
       }
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted) showAppSnackBar(context, e.toString(), isError: true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -84,12 +86,10 @@ class _SubscriptionFormScreenState extends ConsumerState<SubscriptionFormScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.subscriptionId != null
-            ? 'Editar suscripción'
-            : 'Nueva suscripción'),
+        title: Text(_isEditing ? 'Editar suscripción' : 'Nueva suscripción'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
         child: Form(
           key: _formKey,
           child: Column(
@@ -97,13 +97,17 @@ class _SubscriptionFormScreenState extends ConsumerState<SubscriptionFormScreen>
             children: [
               TextFormField(
                 controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: 'Nombre (ej. Netflix)'),
-                validator: (v) => (v == null || v.isEmpty) ? 'Requerido' : null,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                    labelText: 'Nombre (ej. Netflix)',
+                    prefixIcon: Icon(Icons.subscriptions_outlined)),
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'Requerido' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _amountCtrl,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
                 decoration: const InputDecoration(labelText: 'Monto', prefixText: '\$ '),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Requerido';
@@ -112,62 +116,68 @@ class _SubscriptionFormScreenState extends ConsumerState<SubscriptionFormScreen>
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               DropdownButtonFormField<int>(
-                value: _accountId,
-                decoration: const InputDecoration(labelText: 'Cuenta de cobro'),
+                initialValue: _accountId,
+                decoration: const InputDecoration(
+                    labelText: 'Cuenta de cobro',
+                    prefixIcon: Icon(Icons.account_balance_wallet_outlined)),
                 items: accounts.map((a) => DropdownMenuItem(
                     value: a.id, child: Text(a.name))).toList(),
                 onChanged: (v) => setState(() => _accountId = v),
+                validator: (v) => v == null ? 'Selecciona una cuenta' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _dayCtrl,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                    labelText: 'Día de cobro (1–31)'),
+                    labelText: 'Día de cobro (1–31)',
+                    prefixIcon: Icon(Icons.event_outlined)),
                 validator: (v) {
                   final n = int.tryParse(v ?? '');
                   if (n == null || n < 1 || n > 31) return '1–31';
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
-              const Text('Ciclo de facturación',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
+              const FormSectionLabel('Ciclo de facturación'),
               Row(children: [
-                Expanded(child: _ToggleBtn(
-                    label: 'Mensual', selected: _cycle == 'monthly',
+                Expanded(child: FormToggleButton(
+                    label: 'Mensual',
+                    icon: Icons.event_repeat,
+                    selected: _cycle == 'monthly',
                     onTap: () => setState(() => _cycle = 'monthly'))),
                 const SizedBox(width: 10),
-                Expanded(child: _ToggleBtn(
-                    label: 'Anual', selected: _cycle == 'yearly',
+                Expanded(child: FormToggleButton(
+                    label: 'Anual',
+                    icon: Icons.calendar_month_outlined,
+                    selected: _cycle == 'yearly',
                     onTap: () => setState(() => _cycle = 'yearly'))),
               ]),
-              const SizedBox(height: 16),
-              const Text('Estado', style: TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
+              const FormSectionLabel('Estado'),
               Row(children: [
-                Expanded(child: _ToggleBtn(
-                    label: 'Activa', selected: _status == 'active',
-                    color: const Color(0xFF00BFA5),
+                Expanded(child: FormToggleButton(
+                    label: 'Activa',
+                    icon: Icons.play_circle_outline,
+                    selected: _status == 'active',
+                    color: AppColors.income,
                     onTap: () => setState(() => _status = 'active'))),
                 const SizedBox(width: 10),
-                Expanded(child: _ToggleBtn(
-                    label: 'Pausada', selected: _status == 'paused',
-                    color: Colors.grey,
+                Expanded(child: FormToggleButton(
+                    label: 'Pausada',
+                    icon: Icons.pause_circle_outline,
+                    selected: _status == 'paused',
+                    color: AppColors.neutral,
                     onTap: () => setState(() => _status = 'paused'))),
               ]),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _loading ? null : _submit,
-                child: _loading
-                    ? const SizedBox(width: 22, height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                    : Text(widget.subscriptionId != null
-                        ? 'Actualizar'
-                        : 'Crear suscripción'),
+              const SizedBox(height: 36),
+              SubmitButton(
+                loading: _loading,
+                onPressed: _submit,
+                icon: _isEditing ? Icons.save_outlined : Icons.add,
+                label: _isEditing ? 'Actualizar' : 'Crear suscripción',
               ),
             ],
           ),
@@ -175,38 +185,4 @@ class _SubscriptionFormScreenState extends ConsumerState<SubscriptionFormScreen>
       ),
     );
   }
-}
-
-class _ToggleBtn extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final Color color;
-  final VoidCallback onTap;
-  const _ToggleBtn({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    this.color = const Color(0xFF1565C0),
-  });
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: selected ? color.withOpacity(0.18) : const Color(0xFF1C2132),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-            color: selected ? color : const Color(0xFF262D42),
-            width: selected ? 2 : 1),
-      ),
-      child: Text(label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: selected ? color : const Color(0xFF8A93A8))),
-    ),
-  );
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants.dart';
+import '../../../shared/widgets/form_widgets.dart';
 import '../providers/accounts_provider.dart';
 import '../models/account.dart';
 
@@ -19,6 +21,8 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
   String _type       = 'debit';
   bool   _loading    = false;
   Account? _editing;
+
+  bool get _isEditing => widget.accountId != null;
 
   @override
   void initState() {
@@ -60,10 +64,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
       }
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())));
-      }
+      if (mounted) showAppSnackBar(context, e.toString(), isError: true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -79,10 +80,10 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.accountId != null ? 'Editar cuenta' : 'Nueva cuenta'),
+        title: Text(_isEditing ? 'Editar cuenta' : 'Nueva cuenta'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
         child: Form(
           key: _formKey,
           child: Column(
@@ -90,34 +91,42 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             children: [
               TextFormField(
                 controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: 'Nombre de la cuenta'),
-                validator: (v) => (v == null || v.isEmpty) ? 'Requerido' : null,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  labelText: 'Nombre de la cuenta',
+                  prefixIcon: Icon(Icons.badge_outlined),
+                ),
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'Requerido' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              // Tipo
-              const Text('Tipo de cuenta',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-              const SizedBox(height: 8),
+              const FormSectionLabel('Tipo de cuenta'),
               Row(
                 children: [
-                  Expanded(child: _TypeBtn(
-                    label: 'Débito', selected: _type == 'debit',
+                  Expanded(child: FormToggleButton(
+                    label: 'Débito',
+                    icon: Icons.payments_outlined,
+                    selected: _type == 'debit',
                     onTap: () => setState(() => _type = 'debit'))),
                   const SizedBox(width: 10),
-                  Expanded(child: _TypeBtn(
-                    label: 'Crédito', selected: _type == 'credit',
+                  Expanded(child: FormToggleButton(
+                    label: 'Crédito',
+                    icon: Icons.credit_card_outlined,
+                    color: AppColors.expense,
+                    selected: _type == 'credit',
                     onTap: () => setState(() => _type = 'credit'))),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               TextFormField(
                 controller: _balanceCtrl,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(
-                    labelText: 'Saldo inicial', prefixText: '\$ '),
+                    labelText: 'Saldo inicial',
+                    prefixIcon: Icon(Icons.account_balance_outlined),
+                    prefixText: '\$ '),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Requerido';
                   if (double.tryParse(v) == null) return 'Número inválido';
@@ -126,63 +135,33 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
               ),
 
               if (_type == 'credit') ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _creditCtrl,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   decoration: const InputDecoration(
-                      labelText: 'Límite de crédito', prefixText: '\$ '),
+                      labelText: 'Límite de crédito (opcional)',
+                      prefixIcon: Icon(Icons.speed_outlined),
+                      prefixText: '\$ '),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return null;
+                    if (double.tryParse(v) == null) return 'Número inválido';
+                    return null;
+                  },
                 ),
               ],
 
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _loading ? null : _submit,
-                child: _loading
-                    ? const SizedBox(width: 22, height: 22,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2.5, color: Colors.white))
-                    : Text(widget.accountId != null ? 'Actualizar' : 'Crear cuenta'),
+              const SizedBox(height: 36),
+              SubmitButton(
+                loading: _loading,
+                onPressed: _submit,
+                icon: _isEditing ? Icons.save_outlined : Icons.add,
+                label: _isEditing ? 'Actualizar' : 'Crear cuenta',
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _TypeBtn extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _TypeBtn({required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: selected
-              ? const Color(0xFF1565C0).withOpacity(0.2)
-              : const Color(0xFF1C2132),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected ? const Color(0xFF1565C0) : const Color(0xFF262D42),
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: Text(label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: selected
-                    ? const Color(0xFF1565C0)
-                    : const Color(0xFF8A93A8))),
       ),
     );
   }
